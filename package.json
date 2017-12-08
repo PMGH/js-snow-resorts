@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/PMGH/js-snow-resorts/issues"
   },
-  "homepage": "https://github.com/PMGH/js-snow-resorts#readme"
+  "homepage": "https://github.com/PMGH/js-snow-resorts#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
 }
