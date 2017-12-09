@@ -11,9 +11,14 @@ var resortIndexRequestComplete = function(){
   var jsonString = this.responseText;
   var resortsData = JSON.parse(jsonString);
   var regions = getRegions(resortsData);
-  var trimmedDataSet = trimDataSet(resortsData, "Quebec");
-  createRegionSelector(regions);
-  populateResorts(trimmedDataSet);
+  var regionSelect = document.getElementById('region-select');
+
+  populateRegionSelector(regions);
+  regionSelect.addEventListener('change', function(){
+    var selectedRegion = regionSelect[regionSelect.selectedIndex].value;
+    var trimmedDataSet = trimDataSet(resortsData, selectedRegion);
+    populateResorts(trimmedDataSet);
+  });
 }
 
 var getRegions = function(resortsData){
@@ -33,20 +38,18 @@ var getRegions = function(resortsData){
 
 var trimDataSet = function(resortsData, regionName){
   var trimmedDataSet = [];
-  // console.log(resortsData[0]);
-  // console.log(resortsData[0].Region);
-  // console.log(resortsData[0].Region[0].name);
   for(var resort of resortsData){
     if ((resort.Region[0] != undefined) && (resort.Region[0].name === regionName)){
-       trimmedDataSet.push(resort);
+      trimmedDataSet.push(resort.SkiArea);
     }
   }
   console.log(trimmedDataSet);
   return trimmedDataSet;
 }
 
-var createRegionSelector = function(regions){
+var populateRegionSelector = function(regions){
   var regionSelect = document.getElementById('region-select');
+  removeChildNodes(regionSelect);
   var guidanceOption = document.createElement('option');
   guidanceOption.innerText = "Please select a region";
   guidanceOption.disabled = true;
@@ -60,9 +63,58 @@ var createRegionSelector = function(regions){
   }
 }
 
-var populateResorts = function(resortsData){
-  var regionSelect = document.getElementById('region-select');
+var populateResorts = function(skiAreas){
+  var main = document.getElementById('page-main');
+  removeChildNodes(main);
+  skiAreas.forEach(function(area){
+    // get area details
+    var areaName = area.name;
+    var areaWebsite = area.official_website;
+    var areaLatitude = area.geo_lat;
+    var areaLongitude = area.geo_lng;
+
+    // create HTML elements
+    var containerSection = document.createElement('section');
+    var detailsDiv = document.createElement('div');
+
+    var skiAreaName = document.createElement('h2');
+    var skiAreaLink = document.createElement('a');
+    var skiAreaLocation = document.createElement('h3');
+
+    var weatherDiv_1 = document.createElement('div');
+    var weatherDiv_2 = document.createElement('div');
+
+    // set elements
+    skiAreaName.innerText = areaName;
+    if (areaWebsite != null){
+      skiAreaLink.href = areaWebsite;
+      skiAreaLink.innerText = `${areaName} official website`;
+    } else {
+      skiAreaLink.innerText = "No official website"
+    }
+    if (areaLatitude != null && areaLongitude != null){
+      skiAreaLocation.innerText = `Latitude: ${areaLatitude}, Longitude: ${areaLongitude}`
+    } else {
+      skiAreaLocation.innerText = "No location available"
+    }
+
+    // append elements
+    detailsDiv.appendChild(skiAreaName);
+    detailsDiv.appendChild(skiAreaLink);
+    detailsDiv.appendChild(skiAreaLocation);
+    containerSection.appendChild(detailsDiv);
+    main.appendChild(containerSection);
+
+  });
 }
+
+var removeChildNodes = function(node){
+  while (node.hasChildNodes()) {
+    node.removeChild(node.lastChild);
+  }
+}
+
+
 
 var resortIndexRequest = function(){
   var url = "https://skimap.org/SkiAreas/index.json";
