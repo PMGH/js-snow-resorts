@@ -88,9 +88,9 @@ var populateResorts = function(skiAreas){
     var containerSection = document.createElement('section');
     var detailsDiv = document.createElement('div');
 
-    var skiAreaName = document.createElement('h2');
+    var skiAreaName = document.createElement('h3');
     var skiAreaLink = document.createElement('a');
-    var skiAreaLocation = document.createElement('h3');
+    var skiAreaLocation = document.createElement('h5');
 
     var weatherDiv_1 = document.createElement('div');
     var weatherDiv_2 = document.createElement('div');
