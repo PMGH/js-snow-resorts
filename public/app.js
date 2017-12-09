@@ -14,15 +14,28 @@ var resortIndexRequestComplete = function(){
   if (this.status != 200) return;
   var jsonString = this.responseText;
   var resortsData = JSON.parse(jsonString);
-  console.log(resortsData);
+  var regions = getRegions(resortsData);
   var trimmedDataSet = trimDataSet(resortsData, "Quebec");
   populateResorts(trimmedDataSet);
 }
 
-var trimDataSet = function(resortsData, regionName){
-  // get data to work with
-  var trimmedDataSet = [];
+var getRegions = function(resortsData){
+  var regions = [];
 
+  for(var resort of resortsData){
+    var region = resort.Region[0];
+    if (region != undefined){
+      if (!regions.includes(region.name)){
+        regions.push(region.name);
+      }
+    }
+  }
+  console.log(regions);
+  return regions;
+}
+
+var trimDataSet = function(resortsData, regionName){
+  var trimmedDataSet = [];
   // console.log(resortsData[0]);
   // console.log(resortsData[0].Region);
   // console.log(resortsData[0].Region[0].name);
@@ -40,7 +53,6 @@ var populateResorts = function(resortsData){
 }
 
 var resortIndexRequest = function(){
-  // skimap - ski area request
   var url = "https://skimap.org/SkiAreas/index.json";
   makeRequest(url, resortIndexRequestComplete);
 }
@@ -54,7 +66,6 @@ var weatherRequestComplete = function(){
 }
 
 var weatherRequest = function(){
-  // worldweatheronline request
   var token = "ebbbfe3e5f59416284e222010170812";
   var lat = "45.3982";
   var long = "6.5657";
