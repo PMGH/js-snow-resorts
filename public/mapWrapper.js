@@ -1,22 +1,29 @@
 var MapWrapper = function(container, coords, zoom){
-  this.googleMap = google.map.Map(container, {
+  this.googleMap = new google.maps.Map(container, {
     center: coords,
     zoom: zoom
   });
   this.markers = [];
 }
 
-MapWrapper.prototype.addMarker = function(coords){
+MapWrapper.prototype.addMarker = function(skiArea){
   var marker = new google.maps.Marker({
-    position: coords,
+    position: skiArea.location,
     icon: "/icons/gnss.png",
     infoWindowOpen: false,
     map: this.googleMap
   });
 
   this.markers.push(marker);
-  marker.infoWindow = new google.maps.InfoWindow({
-    content: `${marker.position}`  // resort name and location
+  var contentString = '<div id="content">'+
+            `<h4 id="ski-area-region">${skiArea.region}</h4>`+
+            '<div id="bodyContent">'+
+            `<h3 id="ski-area-name">${skiArea.name}</h3>` +
+            `<h5>Location: ${marker.position}</h5>`+
+            '</div>'+
+            '</div>';
+  marker.infowindow = new google.maps.InfoWindow({
+    content: contentString
   });
 
   marker.addListener('click', function(){

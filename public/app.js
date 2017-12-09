@@ -15,10 +15,9 @@ var resortIndexRequestComplete = function(){
   var jsonString = this.responseText;
   var resortsData = JSON.parse(jsonString);
   console.log(resortsData);
+
   var regions = getRegions(resortsData);
   var regionSelect = document.getElementById('region-select');
-
-  pieChartSkiAreaByRegion(resortsData, regions);
 
   populateRegionSelector(regions);
   regionSelect.addEventListener('change', function(){
@@ -26,6 +25,10 @@ var resortIndexRequestComplete = function(){
     var trimmedDataSet = trimDataSet(resortsData, selectedRegion);
     populateResorts(trimmedDataSet);
   });
+
+  pieChartSkiAreaByRegion(resortsData, regions);
+
+  populateMap(resortsData);
 }
 
 
@@ -122,7 +125,6 @@ var populateResorts = function(skiAreas){
 }
 
 
-
 var weatherRequest = function(coords, days){
   var token = "ebbbfe3e5f59416284e222010170812";
   var lat = coords.lat;
@@ -195,9 +197,34 @@ var pieChartSkiAreaByRegion = function(apiData, regions){
   });
   console.log("Series: ", series);
 
-
   // create pie chart
   new PieChart(container, title, series);
+
+}
+
+
+var populateMap = function(resortsData){
+  var main = document.getElementById('page-main');
+  var container = document.createElement('div');
+  container.id = 'main-map';
+
+  var center = { lat: 45.3982, lng: 6.5657 };
+  var zoom = 10;
+  var mainMap = new MapWrapper(container, center, zoom);
+  main.appendChild(container);
+
+  resortsData.forEach(function(area){
+    var region = (area.Region[0] != undefined) ? area.Region[0].name : "No region data";
+    var skiArea = {
+      region: region,
+      name: area.SkiArea.name,
+      location: {
+        lat: parseFloat(area.SkiArea.geo_lat),
+        lng: parseFloat(area.SkiArea.geo_lng)
+      }
+    }
+    mainMap.addMarker(skiArea);
+  });
 
 }
 
