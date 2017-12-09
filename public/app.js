@@ -5,6 +5,47 @@ var makeRequest = function(url, callback){
   request.send();
 }
 
+var resortRequestComplete = function(){
+
+}
+
+
+var resortIndexRequestComplete = function(){
+  if (this.status != 200) return;
+  var jsonString = this.responseText;
+  var resortsData = JSON.parse(jsonString);
+  console.log(resortsData);
+  var trimmedDataSet = trimDataSet(resortsData, "Quebec");
+  populateResorts(trimmedDataSet);
+}
+
+var trimDataSet = function(resortsData, regionName){
+  // get data to work with
+  var trimmedDataSet = [];
+
+  // console.log(resortsData[0]);
+  // console.log(resortsData[0].Region);
+  // console.log(resortsData[0].Region[0].name);
+  for(var resort of resortsData){
+    if ((resort.Region[0] != undefined) && (resort.Region[0].name === regionName)){
+       trimmedDataSet.push(resort);
+    }
+  }
+  console.log(trimmedDataSet);
+  return trimmedDataSet;
+}
+
+var populateResorts = function(resortsData){
+
+}
+
+var resortIndexRequest = function(){
+  // skimap - ski area request
+  var url = "https://skimap.org/SkiAreas/index.json";
+  makeRequest(url, resortIndexRequestComplete);
+}
+
+
 var weatherRequestComplete = function(){
   if (this.status != 200) return;
   var jsonString = this.responseText;
