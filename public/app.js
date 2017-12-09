@@ -5,6 +5,26 @@ var makeRequest = function(url, callback){
   request.send();
 }
 
+var resortIndexRequest = function(){
+  var url = "https://skimap.org/SkiAreas/index.json";
+  makeRequest(url, resortIndexRequestComplete);
+}
+
+var weatherRequest = function(coords, days){
+  var token = "ebbbfe3e5f59416284e222010170812";
+  var lat = coords.lat;
+  var long = coords.lng;
+  var num_days = days;
+  var url = "https://api.worldweatheronline.com/premium/v1/ski.ashx?key=" + token + "&q=" + lat + "," + long + "&num_of_days=" + num_days + "&includeLocation=no&format=json";
+  makeRequest(url, weatherRequestComplete);
+}
+
+var weatherRequestComplete = function(){
+  if (this.status != 200) return;
+  var jsonString = this.responseText;
+  var weatherData = JSON.parse(jsonString);
+  console.log(weatherData);
+}
 
 var resortIndexRequestComplete = function(){
   if (this.status != 200) return;
@@ -20,6 +40,7 @@ var resortIndexRequestComplete = function(){
     populateResorts(trimmedDataSet);
   });
 }
+
 
 var getRegions = function(resortsData){
   var regions = [];
@@ -85,6 +106,11 @@ var populateResorts = function(skiAreas){
     var weatherDiv_2 = document.createElement('div');
 
     // set elements
+    detailsDiv.className = "skiArea";
+    skiAreaName.className = "skiAreaName";
+    skiAreaLink.className = "skiAreaLink";
+    skiAreaLocation.className = "skiAreaLocation";
+
     skiAreaName.innerText = areaName;
     if (areaWebsite != null){
       skiAreaLink.href = areaWebsite;
@@ -114,29 +140,6 @@ var removeChildNodes = function(node){
   }
 }
 
-
-
-var resortIndexRequest = function(){
-  var url = "https://skimap.org/SkiAreas/index.json";
-  makeRequest(url, resortIndexRequestComplete);
-}
-
-
-var weatherRequestComplete = function(){
-  if (this.status != 200) return;
-  var jsonString = this.responseText;
-  var weatherData = JSON.parse(jsonString);
-  console.log(weatherData);
-}
-
-var weatherRequest = function(coords){
-  var token = "ebbbfe3e5f59416284e222010170812";
-  var lat = "45.3982";
-  var long = "6.5657";
-  var num_days = "2";
-  var url = "https://api.worldweatheronline.com/premium/v1/ski.ashx?key=" + token + "&q=" + lat + "," + long + "&num_of_days=" + num_days + "&includeLocation=no&format=json";
-  makeRequest(url, weatherRequestComplete);
-}
 
 
 var app = function(){
