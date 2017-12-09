@@ -1,0 +1,30 @@
+body{
+  font-family: 'Oxygen', sans-serif;
+}
+
+#region-select {
+  align-self: center;
+  margin: auto;
+  width: 35%;
+}
+
+.skiArea {
+  background-color: #E3E9ED;
+  border-bottom: 2px solid #4D7DA8;
+  padding: 10px;
+  margin: 20px;
+}
+
+.skiAreaName {
+  font-weight: 900;
+}
+
+.skiAreaLink{
+  color: #6D9BC3;
+  font-style: italic;
+  text-decoration: none;
+}
+
+.skiAreaLocation{
+  font-weight: 400;
+}
