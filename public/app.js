@@ -5,10 +5,6 @@ var makeRequest = function(url, callback){
   request.send();
 }
 
-var resortRequestComplete = function(){
-
-}
-
 
 var resortIndexRequestComplete = function(){
   if (this.status != 200) return;
@@ -16,12 +12,12 @@ var resortIndexRequestComplete = function(){
   var resortsData = JSON.parse(jsonString);
   var regions = getRegions(resortsData);
   var trimmedDataSet = trimDataSet(resortsData, "Quebec");
+  createRegionSelector(regions);
   populateResorts(trimmedDataSet);
 }
 
 var getRegions = function(resortsData){
   var regions = [];
-
   for(var resort of resortsData){
     var region = resort.Region[0];
     if (region != undefined){
@@ -30,6 +26,7 @@ var getRegions = function(resortsData){
       }
     }
   }
+  regions.sort();
   console.log(regions);
   return regions;
 }
@@ -48,8 +45,23 @@ var trimDataSet = function(resortsData, regionName){
   return trimmedDataSet;
 }
 
-var populateResorts = function(resortsData){
+var createRegionSelector = function(regions){
+  var regionSelect = document.getElementById('region-select');
+  var guidanceOption = document.createElement('option');
+  guidanceOption.innerText = "Please select a region";
+  guidanceOption.disabled = true;
+  guidanceOption.selected = true;
+  regionSelect.appendChild(guidanceOption);
 
+  for (var region of regions){
+    var regionOption = document.createElement('option');
+    regionOption.innerText = region;
+    regionSelect.appendChild(regionOption);
+  }
+}
+
+var populateResorts = function(resortsData){
+  var regionSelect = document.getElementById('region-select');
 }
 
 var resortIndexRequest = function(){
@@ -65,11 +77,12 @@ var weatherRequestComplete = function(){
   console.log(weatherData);
 }
 
-var weatherRequest = function(){
+var weatherRequest = function(coords){
   var token = "ebbbfe3e5f59416284e222010170812";
   var lat = "45.3982";
   var long = "6.5657";
-  var url = "https://api.worldweatheronline.com/premium/v1/ski.ashx?key=" + token + "&q=" + lat + "," + long + "&format=json";
+  var num_days = "2";
+  var url = "https://api.worldweatheronline.com/premium/v1/ski.ashx?key=" + token + "&q=" + lat + "," + long + "&num_of_days=" + num_days + "&includeLocation=no&format=json";
   makeRequest(url, weatherRequestComplete);
 }
 
