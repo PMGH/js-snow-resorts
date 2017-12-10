@@ -14,7 +14,6 @@ var resortIndexRequestComplete = function(){
   if (this.status != 200) return;
   var jsonString = this.responseText;
   var resortsData = JSON.parse(jsonString);
-  console.log(resortsData);
 
   var regions = getRegions(resortsData);
   var regionSelect = document.getElementById('region-select');
@@ -43,7 +42,6 @@ var getRegions = function(resortsData){
     }
   }
   regions.sort();
-  console.log(regions);
   return regions;
 }
 
@@ -54,7 +52,6 @@ var trimDataSet = function(resortsData, regionName){
       trimmedDataSet.push(resort.SkiArea);
     }
   }
-  console.log(trimmedDataSet);
   return trimmedDataSet;
 }
 
@@ -75,18 +72,32 @@ var populateRegionSelector = function(regions){
 }
 
 var populateResorts = function(skiAreas){
+  var head = document.getElementById('page-header');
   var main = document.getElementById('page-main');
   removeChildNodes(main);
+  // var numDaysSelect = document.createElement('select');
+  // numDaysSelect.id = "num-days-select";
+
   skiAreas.forEach(function(area){
     // get area details
+    // areaId made global to be accessible to the weatherRequest
+    areaId = area.id;
     var areaName = area.name;
     var areaWebsite = area.official_website;
     var areaLatitude = area.geo_lat;
     var areaLongitude = area.geo_lng;
+    var areaLocation = {
+      lat: areaLatitude,
+      lng: areaLongitude
+    }
+
+    // request weather data
+    weatherRequest(areaLocation, "2");
 
     // create HTML elements
     var containerSection = document.createElement('section');
     var detailsDiv = document.createElement('div');
+    detailsDiv.id = areaId;
 
     var skiAreaName = document.createElement('h3');
     var skiAreaLink = document.createElement('a');
@@ -95,7 +106,7 @@ var populateResorts = function(skiAreas){
     var weatherDiv_1 = document.createElement('div');
     var weatherDiv_2 = document.createElement('div');
 
-    // set elements
+    // set ski area details elements
     detailsDiv.className = "skiArea";
     skiAreaName.className = "skiAreaName";
     skiAreaLink.className = "skiAreaLink";
@@ -114,6 +125,9 @@ var populateResorts = function(skiAreas){
       skiAreaLocation.innerText = "No location available"
     }
 
+    // weather divs
+
+
     // append elements
     detailsDiv.appendChild(skiAreaName);
     detailsDiv.appendChild(skiAreaLink);
@@ -122,25 +136,43 @@ var populateResorts = function(skiAreas){
     main.appendChild(containerSection);
 
   });
+
 }
 
 
 var weatherRequest = function(coords, days){
+  var id = areaId;
   var token = "ebbbfe3e5f59416284e222010170812";
   var lat = coords.lat;
   var long = coords.lng;
   var num_days = days;
+  console.log("Preparing request for Id: ", areaId);
   var url = "https://api.worldweatheronline.com/premium/v1/ski.ashx?key=" + token + "&q=" + lat + "," + long + "&num_of_days=" + num_days + "&includeLocation=no&format=json";
+  console.log(url);
   makeRequest(url, weatherRequestComplete);
+  // makeWeatherRequest(url, function(){
+  //   weatherRequestComplete(id);
+  // }.bind(this));
 }
 
 var weatherRequestComplete = function(){
-  if (this.status != 200) return;
+  console.log("Requested weather for Id: ", areaId);
+  if (this.status != 200){
+    console.log("No luck");
+    return;
+  }
+  console.log("Status code 200");
   var jsonString = this.responseText;
   var weatherData = JSON.parse(jsonString);
   console.log(weatherData);
+  populateWeather(weatherData);
 }
 
+var populateWeather = function(weatherData){
+  console.log(`Id ${areaId}: `, weatherData);
+  // var detailsDiv = document.getElementById(areaId);
+
+}
 
 
 var pieChartSkiAreaByRegion = function(apiData, regions){
@@ -157,7 +189,6 @@ var pieChartSkiAreaByRegion = function(apiData, regions){
     name: 'Ski Areas by region',
     data: []
   }];
-
   // get region objects
   var regionObjects = [];
   apiData.forEach(function(item){
@@ -169,9 +200,6 @@ var pieChartSkiAreaByRegion = function(apiData, regions){
       regionObjects.push(region);
     }
   });
-  console.log("Regions: ", regions);
-  console.log("Region Objects: ", regionObjects);
-
   // count occurrences
   var counts = [];
   for (var region of regions){
@@ -181,7 +209,6 @@ var pieChartSkiAreaByRegion = function(apiData, regions){
     }
     counts.push(count);
   }
-
   for (var count of counts){
     for (var object of regionObjects){
       if (count.name === object.name){
@@ -189,17 +216,12 @@ var pieChartSkiAreaByRegion = function(apiData, regions){
       }
     }
   }
-  console.log("Counts: ", counts);
-
   // push to series data
   counts.forEach(function(count){
     series[0].data.push(count);
   });
-  console.log("Series: ", series);
-
   // create pie chart
   new PieChart(container, title, series);
-
 }
 
 
