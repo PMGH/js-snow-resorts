@@ -81,7 +81,7 @@ var populateResorts = function(skiAreas){
   skiAreas.forEach(function(area){
     // get area details
     // areaId made global to be accessible to the weatherRequest
-    areaId = area.id;
+    var areaId = area.id;
     var areaName = area.name;
     var areaWebsite = area.official_website;
     var areaLatitude = area.geo_lat;
@@ -92,7 +92,7 @@ var populateResorts = function(skiAreas){
     }
 
     // request weather data
-    weatherRequest(areaLocation, "2");
+    weatherRequest(areaId, areaLocation, "2");
 
     // create HTML elements
     var containerSection = document.createElement('section');
@@ -102,9 +102,6 @@ var populateResorts = function(skiAreas){
     var skiAreaName = document.createElement('h3');
     var skiAreaLink = document.createElement('a');
     var skiAreaLocation = document.createElement('h5');
-
-    var weatherDiv_1 = document.createElement('div');
-    var weatherDiv_2 = document.createElement('div');
 
     // set ski area details elements
     detailsDiv.className = "skiArea";
@@ -125,9 +122,6 @@ var populateResorts = function(skiAreas){
       skiAreaLocation.innerText = "No location available"
     }
 
-    // weather divs
-
-
     // append elements
     detailsDiv.appendChild(skiAreaName);
     detailsDiv.appendChild(skiAreaLink);
@@ -139,8 +133,17 @@ var populateResorts = function(skiAreas){
 
 }
 
+var makeWeatherRequest = function(areaId, url, callback){
+  var request = new XMLHttpRequest();
+  request.open("GET", url);
+  request.addEventListener('load', function(){
+    callback(areaId);
+  }.bind(this));
+  request.send();
+}
 
-var weatherRequest = function(coords, days){
+
+var weatherRequest = function(areaId, coords, days){
   var id = areaId;
   var token = "ebbbfe3e5f59416284e222010170812";
   var lat = coords.lat;
@@ -149,13 +152,15 @@ var weatherRequest = function(coords, days){
   console.log("Preparing request for Id: ", areaId);
   var url = "https://api.worldweatheronline.com/premium/v1/ski.ashx?key=" + token + "&q=" + lat + "," + long + "&num_of_days=" + num_days + "&includeLocation=no&format=json";
   console.log(url);
-  makeRequest(url, weatherRequestComplete);
-  // makeWeatherRequest(url, function(){
-  //   weatherRequestComplete(id);
-  // }.bind(this));
+  // makeRequest(url, weatherRequestComplete);
+
+  // pass areaId into weatherRequestComplete???
+  makeWeatherRequest(id, url, function(){
+    weatherRequestComplete(id);
+  });
 }
 
-var weatherRequestComplete = function(){
+var weatherRequestComplete = function(areaId){
   console.log("Requested weather for Id: ", areaId);
   if (this.status != 200){
     console.log("No luck");
@@ -165,12 +170,31 @@ var weatherRequestComplete = function(){
   var jsonString = this.responseText;
   var weatherData = JSON.parse(jsonString);
   console.log(weatherData);
-  populateWeather(weatherData);
+  populateWeather(areaId, weatherData.data.weather);
 }
 
-var populateWeather = function(weatherData){
-  console.log(`Id ${areaId}: `, weatherData);
-  // var detailsDiv = document.getElementById(areaId);
+var populateWeather = function(areaId, weather){
+  console.log(`Id ${areaId}: `, weather);
+  var detailsDiv = document.getElementById(areaId);
+
+  weather.forEach(function(forecast){
+    var weatherDiv = document.createElement('div');
+    var date = document.createElement('h5');
+    var chanceOfSnowfall = document.createElement('h5');
+    var totalSnowfall = document.createElement('h5');
+
+    weatherDiv.className = "weather";
+    weatherDiv.id = forecast.date;
+
+    date.innerText = forecast.date;
+    chanceOfSnowfall.innerText = forecast.chanceofsnow;
+    totalSnowfall.innerText = forecast.totalSnowfall_cm;
+
+    weatherDiv.appendChild(date);
+    weatherDiv.appendChild(chanceOfSnowfall);
+    weatherDiv.appendChild(totalSnowfall);
+    detailsDiv.appendChild(weatherDiv);
+  });
 
 }
 
@@ -233,8 +257,22 @@ var populateMap = function(resortsData){
   var center = { lat: 45.3982, lng: 6.5657 };
   var zoom = 10;
   var mainMap = new MapWrapper(container, center, zoom);
+  // main.appendChild(container);
+
+  // search box
+  var input = document.createElement('input');
+  input.id = "search-input";
+  input.class = "controls";
+  input.type = "text";
+  input.placeholder = "Search for a location";
+  console.log(input);
+  // create new google maps search box from input element
+  mainMap.createSearchBox(input);
+
+  // append elements
   main.appendChild(container);
 
+  // populate map with resort markers
   resortsData.forEach(function(area){
     var region = (area.Region[0] != undefined) ? area.Region[0].name : "No region data";
     var skiArea = {

@@ -16,12 +16,12 @@ MapWrapper.prototype.addMarker = function(skiArea){
 
   this.markers.push(marker);
   var contentString = '<div id="content">'+
-            `<h4 id="ski-area-region">${skiArea.region}</h4>`+
-            '<div id="bodyContent">'+
-            `<h3 id="ski-area-name">${skiArea.name}</h3>` +
-            `<h5>Location: ${marker.position}</h5>`+
-            '</div>'+
-            '</div>';
+  `<h4 id="ski-area-region">${skiArea.region}</h4>`+
+  '<div id="bodyContent">'+
+  `<h3 id="ski-area-name">${skiArea.name}</h3>` +
+  `<h5>Location: ${marker.position}</h5>`+
+  '</div>'+
+  '</div>';
   marker.infowindow = new google.maps.InfoWindow({
     content: contentString
   });
@@ -52,4 +52,52 @@ MapWrapper.prototype.whereAmI = function(){
     this.googleMap.setZoom(19);
     this.addMarker(coords);
   }.bind(this));
+}
+
+MapWrapper.prototype.createSearchBox = function(input){
+  var searchBox = new google.maps.places.SearchBox(input);
+  this.googleMap.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+  // this.googleMap.addListener('bounds_changed', function() {
+  //   searchBox.setBounds(this.googleMap.getBounds());
+  // });
+
+  // Listen for the event fired when the user selects a prediction and retrieve
+  searchBox.addListener('places_changed', function() {
+    var places = searchBox.getPlaces();
+    if (places.length == 0) {
+      return;
+    }
+    var bounds = new google.maps.LatLngBounds();
+    places.forEach(function(place) {
+      if (!place.geometry) {
+        console.log("Returned place contains no geometry");
+        return;
+      }
+      // var icon = {
+      //   url: place.icon,
+      //   size: new google.maps.Size(71, 71),
+      //   origin: new google.maps.Point(0, 0),
+      //   anchor: new google.maps.Point(17, 34),
+      //   scaledSize: new google.maps.Size(25, 25)
+      // };
+      //
+      // // Create a marker for each place.
+      // markers.push(new google.maps.Marker({
+      //   map: map,
+      //   icon: icon,
+      //   title: place.name,
+      //   position: place.geometry.location
+      // }));
+
+      if (place.geometry.viewport) {
+        // Only geocodes have viewport.
+        bounds.union(place.geometry.viewport);
+      } else {
+        bounds.extend(place.geometry.location);
+      }
+    });
+    this.googleMap.fitBounds(bounds);
+  }.bind(this));
+
 }
