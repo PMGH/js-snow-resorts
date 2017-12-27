@@ -17,6 +17,10 @@
   },
   "homepage": "https://github.com/PMGH/js-snow-resorts#readme",
   "dependencies": {
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "mongodb": "^3.0.1"
+  },
+  "devDependencies": {
+    "mocha": "^4.0.1"
   }
 }
