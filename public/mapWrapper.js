@@ -4,6 +4,7 @@ var MapWrapper = function(container, coords, zoom){
     zoom: zoom
   });
   this.markers = [];
+  this.newMarker = [];
 }
 
 MapWrapper.prototype.addMarker = function(skiArea){
@@ -70,25 +71,26 @@ MapWrapper.prototype.createSearchBox = function(input){
     }
     var bounds = new google.maps.LatLngBounds();
     places.forEach(function(place) {
+      var newPlace = place;
       if (!place.geometry) {
         console.log("Returned place contains no geometry");
         return;
       }
-      // var icon = {
-      //   url: place.icon,
-      //   size: new google.maps.Size(71, 71),
-      //   origin: new google.maps.Point(0, 0),
-      //   anchor: new google.maps.Point(17, 34),
-      //   scaledSize: new google.maps.Size(25, 25)
-      // };
-      //
-      // // Create a marker for each place.
-      // markers.push(new google.maps.Marker({
-      //   map: map,
-      //   icon: icon,
-      //   title: place.name,
-      //   position: place.geometry.location
-      // }));
+      var icon = {
+        url: place.icon,
+        size: new google.maps.Size(71, 71),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(25, 25)
+      };
+
+      // Create a marker for each place.
+      console.log(this);
+      console.log(this.googleMap);
+
+      this.createMarker(newPlace, icon);
+
+      // this.addSearchedLocationMarker(newMarker);
 
       if (place.geometry.viewport) {
         // Only geocodes have viewport.
@@ -96,8 +98,22 @@ MapWrapper.prototype.createSearchBox = function(input){
       } else {
         bounds.extend(place.geometry.location);
       }
-    });
+
+    }.bind(this));
+
     this.googleMap.fitBounds(bounds);
+
   }.bind(this));
 
+}
+
+MapWrapper.prototype.createMarker = function(place, icon){
+  var newMarker = new google.maps.Marker({
+    map: this.googleMap,
+    icon: icon,
+    title: place.name,
+    position: place.geometry.location
+  });
+  console.log(newMarker);
+  this.markers.push(newMarker);
 }

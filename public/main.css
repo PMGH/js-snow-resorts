@@ -41,6 +41,8 @@ main {
 }
 
 #search-input {
+  height: 24px;
+  margin: 10px;
   width: 50%;
 }
 
